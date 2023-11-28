@@ -17,6 +17,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final emailController = TextEditingController();
 
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
 //sign user in method
   void signUserUp() async {
@@ -30,12 +31,16 @@ class _RegisterPageState extends State<RegisterPage> {
         });
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-
-      Navigator.pop(context);
+      if (passwordController.text == confirmPasswordController.text) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+        Navigator.pop(context);
+      } else {
+        Navigator.pop(context);
+        failedConfirmPassword();
+      }
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
       // showDialog(
@@ -58,8 +63,19 @@ class _RegisterPageState extends State<RegisterPage> {
     showDialog(
       context: context,
       builder: (context) {
-        return const AlertDialog(
+        return AlertDialog(
           title: Text('The password provided is too weak'),
+        );
+      },
+    );
+  }
+
+  void failedConfirmPassword() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("The passwords don't match"),
         );
       },
     );
@@ -69,7 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
     showDialog(
       context: context,
       builder: (context) {
-        return const AlertDialog(
+        return AlertDialog(
           title: Text('The account already exists for that email.'),
         );
       },
@@ -87,7 +103,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 padding: EdgeInsets.symmetric(vertical: 20),
                 child: Image.asset(
                   "images/login.png",
-                  height: 250,
+                  height: 200,
                 ),
               ),
               SizedBox(
@@ -109,9 +125,17 @@ class _RegisterPageState extends State<RegisterPage> {
                 icon: 'lock',
               ),
               SizedBox(
-                height: 10,
+                height: 20,
               ),
-
+              myTextFiled(
+                controller: confirmPasswordController,
+                hintText: "Confirm Password",
+                obscureText: true,
+                icon: 'lock',
+              ),
+              SizedBox(
+                height: 20,
+              ),
               MyButton(
                 onTap: signUserUp,
                 text: 'Sign up',
